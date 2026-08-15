@@ -20,7 +20,7 @@ export const demos: Demo[] = [
     number: 1,
     title: 'Client Onboarding',
     tagline: '12 manual steps. Automated in 30 seconds.',
-    pain: 'Most agencies spend 2-3 hours onboarding every new client — manually. Drive folder, Slack channel, Notion workspace, welcome email. 12 steps. Every single client.',
+    pain: 'Most agencies spend 2-3 hours onboarding every new client - manually. Drive folder, Slack channel, Notion workspace, welcome email. 12 steps. Every single client.',
     videoId: '',
     stack: ['n8n', 'Claude', 'Google Drive', 'Slack', 'Notion', 'Gmail'],
     steps: [
@@ -52,7 +52,7 @@ export const demos: Demo[] = [
     number: 3,
     title: 'Lead Follow-Up Automation',
     tagline: '100% of leads replied to in under 60 seconds.',
-    pain: "Most agencies reply to maybe half their inbound leads — not because they don't care, but because the team is already slammed. 40 leads a month. 20 never hear back.",
+    pain: "Most agencies reply to maybe half their inbound leads - not because they don't care, but because the team is already slammed. 40 leads a month. 20 never hear back.",
     videoId: '',
     stack: ['n8n', 'Claude', 'Tally', 'Google Sheets', 'Gmail', 'Slack'],
     steps: [
@@ -68,7 +68,7 @@ export const demos: Demo[] = [
     number: 4,
     title: 'SEO Content Pipeline',
     tagline: '10 hours of content work. 2 minutes. Automated.',
-    pain: 'A content agency producing one blog post per client per week spends 10+ hours on it — research, writing, repurposing for LinkedIn, Instagram, email, Twitter. Every week. For every client.',
+    pain: 'A content agency producing one blog post per client per week spends 10+ hours on it - research, writing, repurposing for LinkedIn, Instagram, email, Twitter. Every week. For every client.',
     videoId: '',
     stack: ['n8n', 'Tally', 'Firecrawl', 'Claude', 'Gemini', 'Gmail'],
     steps: [
