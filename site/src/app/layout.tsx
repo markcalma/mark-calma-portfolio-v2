@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' })
 
 export const metadata: Metadata = {
-  title: 'Mark Calma — Automation for Agencies',
+  title: 'Mark Calma | Automation for Agencies',
   description: 'I build automations that save agencies 10+ hours a week.',
 }
 

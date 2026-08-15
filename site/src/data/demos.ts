@@ -18,7 +18,7 @@ export const demos: Demo[] = [
   {
     slug: 'demo-1',
     number: 1,
-    title: 'Client Onboarding',
+    title: 'Client Onboarding Automation',
     tagline: '12 manual steps. Automated in 30 seconds.',
     pain: 'Most agencies spend 2-3 hours onboarding every new client - manually. Drive folder, Slack channel, Notion workspace, welcome email. 12 steps. Every single client.',
     videoId: '',
