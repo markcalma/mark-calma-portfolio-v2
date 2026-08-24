@@ -1,0 +1,166 @@
+{
+  "name": "Demo 10: Deadline Monitor + PM Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "days", "triggerAtHour": 8 }]
+        }
+      },
+      "id": "d10-node-01",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 240]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": { "value": "YOUR_GOOGLE_SHEET_ID", "__rl": true, "mode": "id" },
+        "sheetName": { "value": "Active Projects", "__rl": true, "mode": "name" },
+        "filters": {
+          "conditions": [{ "keyName": "Status", "condition": "eq", "keyValue": "Active" }]
+        },
+        "options": {}
+      },
+      "id": "d10-node-02",
+      "name": "Read Active Projects",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const today = new Date();\ntoday.setHours(0, 0, 0, 0);\n\nconst projects = $input.all().map(item => {\n  const row = item.json;\n  const deadline = new Date(row['Deadline']);\n  deadline.setHours(0, 0, 0, 0);\n  const daysUntil = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));\n\n  let riskLevel = null;\n  if (daysUntil < 0) riskLevel = 'Overdue';\n  else if (daysUntil === 0) riskLevel = 'Due Today';\n  else if (daysUntil <= 3) riskLevel = 'At Risk';\n\n  return {\n    clientName: row['Client Name'],\n    clientEmail: row['Client Email'],\n    projectName: row['Project Name'],\n    deadline: row['Deadline'],\n    percentComplete: row['Percent Complete'],\n    pmEmail: row['PM Email'],\n    daysUntil,\n    riskLevel\n  };\n});\n\nconst atRisk = projects.filter(p => p.riskLevel !== null);\n\nreturn { atRisk, totalProjects: projects.length };"
+      },
+      "id": "d10-node-03",
+      "name": "Flag At-Risk Projects",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 240]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "d10-if-cond",
+              "leftValue": "={{ $json.atRisk.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d10-node-04",
+      "name": "Any At Risk?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 240]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Today's date: {{ new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}\nTotal active projects: {{ $json.totalProjects }}\n\nAt-risk projects:\n{{ JSON.stringify($json.atRisk, null, 2) }}\n\nReturn this exact JSON:\n{\n  \"slackMessage\": \"concise Slack message with project list and actions (use \\\\n for line breaks)\",\n  \"emailSubject\": \"email subject line\",\n  \"emailBody\": \"full HTML email body with prioritized project list and action items\"\n}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessage",
+              "message": "You are a project operations system writing a daily deadline alert for an agency PM.\nBe direct and actionable. List projects by priority: Overdue first, then Due Today, then At Risk.\nFor each project, state what action the PM needs to take today.\nKeep the tone calm but urgent. No fluff.\nReturn only valid JSON. No explanation. No markdown."
+            }
+          ]
+        }
+      },
+      "id": "d10-node-05",
+      "name": "Write Alert Summary",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [880, 140]
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4-6",
+        "options": {}
+      },
+      "id": "d10-node-05-llm",
+      "name": "Claude via OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [880, -40]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const raw = $input.item.json.text;\nreturn JSON.parse(raw);"
+      },
+      "id": "d10-node-06",
+      "name": "Parse Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 140]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "value": "project-ops", "__rl": true, "mode": "name" },
+        "text": "={{ $json.slackMessage }}",
+        "otherOptions": {}
+      },
+      "id": "d10-node-07",
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1320, 140]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Flag At-Risk Projects').item.json.atRisk[0].pmEmail }}",
+        "subject": "={{ $json.emailSubject }}",
+        "message": "={{ $json.emailBody }}",
+        "options": { "appendAttribution": false }
+      },
+      "id": "d10-node-08",
+      "name": "Send PM Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1540, 140]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "Read Active Projects", "type": "main", "index": 0 }]]
+    },
+    "Read Active Projects": {
+      "main": [[{ "node": "Flag At-Risk Projects", "type": "main", "index": 0 }]]
+    },
+    "Flag At-Risk Projects": {
+      "main": [[{ "node": "Any At Risk?", "type": "main", "index": 0 }]]
+    },
+    "Any At Risk?": {
+      "main": [
+        [{ "node": "Write Alert Summary", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Claude via OpenRouter": {
+      "ai_languageModel": [[{ "node": "Write Alert Summary", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Write Alert Summary": {
+      "main": [[{ "node": "Parse Alert", "type": "main", "index": 0 }]]
+    },
+    "Parse Alert": {
+      "main": [[{ "node": "Send Slack Alert", "type": "main", "index": 0 }]]
+    },
+    "Send Slack Alert": {
+      "main": [[{ "node": "Send PM Email", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "" },
+  "tags": []
+}

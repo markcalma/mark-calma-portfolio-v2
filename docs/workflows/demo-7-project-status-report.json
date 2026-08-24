@@ -1,0 +1,154 @@
+{
+  "name": "Demo 7: Automated Project Status Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "weeks", "daysOfTheWeek": [5], "triggerAtHour": 9 }]
+        }
+      },
+      "id": "d7-node-01",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 240]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": { "value": "YOUR_GOOGLE_SHEET_ID", "__rl": true, "mode": "id" },
+        "sheetName": { "value": "Active Projects", "__rl": true, "mode": "name" },
+        "filters": {
+          "conditions": [{ "keyName": "Status", "condition": "eq", "keyValue": "Active" }]
+        },
+        "options": {}
+      },
+      "id": "d7-node-02",
+      "name": "Read Active Projects",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d7-node-03",
+      "name": "Loop Over Projects",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [440, 240]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Client: {{ $json['Client Name'] }}\nProject: {{ $json['Project Name'] }}\nTasks completed this week: {{ $json['Tasks Done This Week'] }}\nBlockers: {{ $json['Blockers'] }}\nNext steps: {{ $json['Next Steps'] }}\nPercent complete: {{ $json['Percent Complete'] }}%\n\nReturn this exact JSON:\n{\n  \"subject\": \"email subject line\",\n  \"body\": \"full status update email body in HTML\"\n}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessage",
+              "message": "You are a project manager at a digital agency writing weekly status updates to clients.\nWrite in a professional but warm tone - like a trusted partner, not a corporate report.\nReference specific tasks and progress. Be direct about blockers without alarming the client.\nKeep it concise: 150-200 words. No bullet points - flowing paragraphs only.\nReturn only valid JSON. No explanation. No markdown."
+            }
+          ]
+        }
+      },
+      "id": "d7-node-04",
+      "name": "Write Client Update",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [660, 240]
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4-6",
+        "options": {}
+      },
+      "id": "d7-node-04-llm",
+      "name": "Claude via OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [660, 60]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const raw = $input.item.json.text;\nreturn JSON.parse(raw);"
+      },
+      "id": "d7-node-05",
+      "name": "Parse Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Loop Over Projects').item.json['Client Email'] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": { "appendAttribution": false }
+      },
+      "id": "d7-node-06",
+      "name": "Send Client Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1100, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst count = items.length;\nconst names = items.map(i => i.json['Client Name'] ?? 'Unknown').join(', ');\nreturn { count, names };"
+      },
+      "id": "d7-node-07",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 240]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "value": "project-updates", "__rl": true, "mode": "name" },
+        "text": "={{ $json.count }} client status updates sent automatically this Friday: {{ $json.names }}",
+        "otherOptions": {}
+      },
+      "id": "d7-node-08",
+      "name": "Send Slack Summary",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1540, 240]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "Read Active Projects", "type": "main", "index": 0 }]]
+    },
+    "Read Active Projects": {
+      "main": [[{ "node": "Loop Over Projects", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Projects": {
+      "main": [
+        [{ "node": "Write Client Update", "type": "main", "index": 0 }],
+        [{ "node": "Aggregate Results", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude via OpenRouter": {
+      "ai_languageModel": [[{ "node": "Write Client Update", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Write Client Update": {
+      "main": [[{ "node": "Parse Update", "type": "main", "index": 0 }]]
+    },
+    "Parse Update": {
+      "main": [[{ "node": "Send Client Email", "type": "main", "index": 0 }]]
+    },
+    "Send Client Email": {
+      "main": [[{ "node": "Loop Over Projects", "type": "main", "index": 0 }]]
+    },
+    "Aggregate Results": {
+      "main": [[{ "node": "Send Slack Summary", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "" },
+  "tags": []
+}

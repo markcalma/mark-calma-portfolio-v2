@@ -1,0 +1,114 @@
+{
+  "name": "Demo 6: Proposal Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d6-node-01",
+      "name": "Tally Trigger",
+      "type": "n8n-nodes-base.tallyTrigger",
+      "typeVersion": 1,
+      "position": [0, 240],
+      "webhookId": "d6-webhook-01"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fields = $input.item.json.data.fields;\nconst get = (label) => fields.find(f => f.label === label)?.value ?? '';\n\nreturn {\n  prospectName: get('Prospect name'),\n  prospectEmail: get('Prospect email'),\n  companyName: get('Company name'),\n  mainChallenge: get('Main challenge (what they told you on the call)'),\n  serviceProposed: get('Service you are proposing'),\n  investmentRange: get('Investment range')\n};"
+      },
+      "id": "d6-node-02",
+      "name": "Normalize Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Prospect name: {{ $json.prospectName }}\nCompany: {{ $json.companyName }}\nTheir main challenge: {{ $json.mainChallenge }}\nService proposed: {{ $json.serviceProposed }}\nInvestment range: {{ $json.investmentRange }}\n\nReturn this exact JSON:\n{\n  \"subject\": \"email subject line\",\n  \"body\": \"full HTML proposal email body\"\n}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessage",
+              "message": "You are a senior agency consultant writing custom proposals for automation services.\nWrite a professional, persuasive proposal email that reads as if personally written - not templated.\nReference the prospect's specific challenge directly. Use plain English. No jargon.\nStructure: opening hook, problem restatement, proposed solution, what they get (3-4 bullet deliverables), timeline, investment, clear next step.\nReturn only valid JSON. No explanation. No markdown."
+            }
+          ]
+        }
+      },
+      "id": "d6-node-03",
+      "name": "Write Proposal",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [440, 240]
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4-6",
+        "options": {}
+      },
+      "id": "d6-node-03-llm",
+      "name": "Claude via OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [440, 60]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const raw = $input.item.json.text;\nreturn JSON.parse(raw);"
+      },
+      "id": "d6-node-04",
+      "name": "Parse Proposal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fields = $('Normalize Fields').item.json;\nconst proposal = $input.item.json;\n\nconst html = `\n<div style=\"font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #111; line-height: 1.6;\">\n  ${proposal.body}\n  <hr style=\"border: none; border-top: 1px solid #eee; margin: 32px 0;\" />\n  <p style=\"color: #888; font-size: 12px;\">Sent via Mark Calma Automation</p>\n</div>\n`;\n\nreturn {\n  emailTo: fields.prospectEmail,\n  emailSubject: proposal.subject,\n  emailBody: html\n};"
+      },
+      "id": "d6-node-05",
+      "name": "Build Email Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.emailTo }}",
+        "subject": "={{ $json.emailSubject }}",
+        "message": "={{ $json.emailBody }}",
+        "options": { "appendAttribution": false }
+      },
+      "id": "d6-node-06",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1100, 240]
+    }
+  ],
+  "connections": {
+    "Tally Trigger": {
+      "main": [[{ "node": "Normalize Fields", "type": "main", "index": 0 }]]
+    },
+    "Normalize Fields": {
+      "main": [[{ "node": "Write Proposal", "type": "main", "index": 0 }]]
+    },
+    "Claude via OpenRouter": {
+      "ai_languageModel": [[{ "node": "Write Proposal", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Write Proposal": {
+      "main": [[{ "node": "Parse Proposal", "type": "main", "index": 0 }]]
+    },
+    "Parse Proposal": {
+      "main": [[{ "node": "Build Email Body", "type": "main", "index": 0 }]]
+    },
+    "Build Email Body": {
+      "main": [[{ "node": "Send Email", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "" },
+  "tags": []
+}

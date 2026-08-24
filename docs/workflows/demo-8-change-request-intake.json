@@ -1,0 +1,146 @@
+{
+  "name": "Demo 8: Change Request Intake",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d8-node-01",
+      "name": "Tally Trigger",
+      "type": "n8n-nodes-base.tallyTrigger",
+      "typeVersion": 1,
+      "position": [0, 240],
+      "webhookId": "d8-webhook-01"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fields = $input.item.json.data.fields;\nconst get = (label) => fields.find(f => f.label === label)?.value ?? '';\n\nreturn {\n  clientName: get('Your name'),\n  clientEmail: get('Your email'),\n  projectName: get('Project name'),\n  requestDescription: get('Describe the change you need'),\n  urgency: get('How urgent is this?')\n};"
+      },
+      "id": "d8-node-02",
+      "name": "Normalize Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Client: {{ $json.clientName }}\nProject: {{ $json.projectName }}\nRequest: {{ $json.requestDescription }}\nUrgency: {{ $json.urgency }}\n\nReturn this exact JSON:\n{\n  \"requestType\": \"Bug Fix | New Feature | Design Change | Content Update\",\n  \"estimatedHours\": 4,\n  \"emailSubject\": \"subject line\",\n  \"emailBody\": \"acknowledgment email body in HTML\"\n}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessage",
+              "message": "You are a project manager at a digital agency.\nRead the client's change request and do three things:\n1. Classify the type: Bug Fix, New Feature, Design Change, or Content Update\n2. Estimate effort in hours (be realistic: small 1-3h, medium 4-8h, large 8-16h)\n3. Write a professional acknowledgment email that references their specific request, confirms you received it, gives a realistic response timeline based on urgency, and sets expectations without overpromising.\nReturn only valid JSON. No explanation. No markdown."
+            }
+          ]
+        }
+      },
+      "id": "d8-node-03",
+      "name": "Classify and Estimate",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [440, 240]
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4-6",
+        "options": {}
+      },
+      "id": "d8-node-03-llm",
+      "name": "Claude via OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [440, 60]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const raw = $input.item.json.text;\nreturn JSON.parse(raw);"
+      },
+      "id": "d8-node-04",
+      "name": "Parse Classification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 240]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "YOUR_GOOGLE_SHEET_ID", "__rl": true, "mode": "id" },
+        "sheetName": { "value": "Change Request Log", "__rl": true, "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ new Date().toISOString() }}",
+            "Client Name": "={{ $('Normalize Fields').item.json.clientName }}",
+            "Client Email": "={{ $('Normalize Fields').item.json.clientEmail }}",
+            "Project": "={{ $('Normalize Fields').item.json.projectName }}",
+            "Request": "={{ $('Normalize Fields').item.json.requestDescription }}",
+            "Urgency": "={{ $('Normalize Fields').item.json.urgency }}",
+            "Type": "={{ $('Parse Classification').item.json.requestType }}",
+            "Estimated Hours": "={{ $('Parse Classification').item.json.estimatedHours }}",
+            "Status": "New"
+          }
+        },
+        "options": {}
+      },
+      "id": "d8-node-05",
+      "name": "Log to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Normalize Fields').item.json.clientEmail }}",
+        "subject": "={{ $('Parse Classification').item.json.emailSubject }}",
+        "message": "={{ $('Parse Classification').item.json.emailBody }}",
+        "options": { "appendAttribution": false }
+      },
+      "id": "d8-node-06",
+      "name": "Send Client Acknowledgment",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1100, 240]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "value": "project-ops", "__rl": true, "mode": "name" },
+        "text": "=New change request logged\nClient: {{ $('Normalize Fields').item.json.clientName }}\nProject: {{ $('Normalize Fields').item.json.projectName }}\nType: {{ $('Parse Classification').item.json.requestType }}\nEstimated: {{ $('Parse Classification').item.json.estimatedHours }}h\nUrgency: {{ $('Normalize Fields').item.json.urgency }}\nClient has been acknowledged automatically.",
+        "otherOptions": {}
+      },
+      "id": "d8-node-07",
+      "name": "Slack Alert to PM",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1320, 240]
+    }
+  ],
+  "connections": {
+    "Tally Trigger": {
+      "main": [[{ "node": "Normalize Fields", "type": "main", "index": 0 }]]
+    },
+    "Normalize Fields": {
+      "main": [[{ "node": "Classify and Estimate", "type": "main", "index": 0 }]]
+    },
+    "Claude via OpenRouter": {
+      "ai_languageModel": [[{ "node": "Classify and Estimate", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Classify and Estimate": {
+      "main": [[{ "node": "Parse Classification", "type": "main", "index": 0 }]]
+    },
+    "Parse Classification": {
+      "main": [[{ "node": "Log to Sheets", "type": "main", "index": 0 }]]
+    },
+    "Log to Sheets": {
+      "main": [[{ "node": "Send Client Acknowledgment", "type": "main", "index": 0 }]]
+    },
+    "Send Client Acknowledgment": {
+      "main": [[{ "node": "Slack Alert to PM", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "" },
+  "tags": []
+}

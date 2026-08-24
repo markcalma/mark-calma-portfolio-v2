@@ -1,0 +1,228 @@
+{
+  "name": "Demo 5: On-Brand Social Image Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d5-node-01",
+      "name": "Tally Trigger",
+      "type": "n8n-nodes-base.tallyTrigger",
+      "typeVersion": 1,
+      "position": [0, 240],
+      "webhookId": "d5-webhook-01"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fields = $input.item.json.data.fields;\nconst get = (label) => fields.find(f => f.label === label)?.value ?? '';\n\nreturn {\n  email: get('Email'),\n  brandName: get('Brand name'),\n  primaryColor: get('Primary color'),\n  styleVibe: get('Style vibe'),\n  contentTopic: get('Content topic')\n};"
+      },
+      "id": "d5-node-02",
+      "name": "Normalize Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Brand name: {{ $json.brandName }}\nPrimary color: {{ $json.primaryColor }}\nStyle vibe: {{ $json.styleVibe }}\nContent topic: {{ $json.contentTopic }}\n\nReturn this exact JSON structure:\n{\n  \"instagramSquare\": \"detailed image prompt for a 1:1 square format Instagram post\",\n  \"instagramStory\": \"detailed image prompt for a 9:16 vertical format Instagram story\",\n  \"linkedInBanner\": \"detailed image prompt for a 16:9 wide format LinkedIn post\"\n}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessage",
+              "message": "You are a creative director specializing in social media visual content for agencies.\nGiven a brand's details, write three image generation prompts - one per platform.\nEach prompt must produce a visually striking, on-brand image with no text overlaid.\nIncorporate the brand's primary color prominently.\nMatch the style vibe precisely: Modern means clean lines and minimal design; Bold means high contrast and strong shapes; Playful means bright colors and dynamic composition; Minimal means whitespace-heavy and understated.\nReturn only valid JSON. No explanation. No markdown."
+            }
+          ]
+        }
+      },
+      "id": "d5-node-03",
+      "name": "Write Image Prompts",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [440, 240]
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4-6",
+        "options": {}
+      },
+      "id": "d5-node-03-llm",
+      "name": "Claude via OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [440, 60]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const raw = $input.item.json.text;\nconst prompts = JSON.parse(raw);\nreturn prompts;"
+      },
+      "id": "d5-node-04",
+      "name": "Parse Prompts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.OPENROUTER_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({model: 'google/gemini-2.0-flash-exp:free', messages: [{role: 'user', content: $('Parse Prompts').item.json.instagramSquare + ' Square 1:1 format.'}]}) }}"
+      },
+      "id": "d5-node-05",
+      "name": "Generate Instagram Square",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const imageUrl = $input.item.json.choices[0].message.images[0].image_url.url;\nreturn { squareDataUri: imageUrl };"
+      },
+      "id": "d5-node-06",
+      "name": "Extract Square Image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.OPENROUTER_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({model: 'google/gemini-2.0-flash-exp:free', messages: [{role: 'user', content: $('Parse Prompts').item.json.instagramStory + ' Vertical 9:16 portrait format.'}]}) }}"
+      },
+      "id": "d5-node-07",
+      "name": "Generate Instagram Story",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const imageUrl = $input.item.json.choices[0].message.images[0].image_url.url;\nreturn { storyDataUri: imageUrl };"
+      },
+      "id": "d5-node-08",
+      "name": "Extract Story Image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.OPENROUTER_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({model: 'google/gemini-2.0-flash-exp:free', messages: [{role: 'user', content: $('Parse Prompts').item.json.linkedInBanner + ' Wide 16:9 landscape format.'}]}) }}"
+      },
+      "id": "d5-node-09",
+      "name": "Generate LinkedIn Banner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1760, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const imageUrl = $input.item.json.choices[0].message.images[0].image_url.url;\nreturn { linkedInDataUri: imageUrl };"
+      },
+      "id": "d5-node-10",
+      "name": "Extract LinkedIn Banner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1980, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fields = $('Normalize Fields').item.json;\nconst squareImg = $('Extract Square Image').item.json.squareDataUri;\nconst storyImg = $('Extract Story Image').item.json.storyDataUri;\nconst linkedInImg = $input.item.json.linkedInDataUri;\n\nconst html = `\n<div style=\"font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: #f9f9f9; padding: 32px;\">\n  <h2 style=\"color: #111; margin-bottom: 4px;\">On-Brand Social Images</h2>\n  <p style=\"color: #555; margin-top: 0;\">Brand: <strong>${fields.brandName}</strong> | Topic: <strong>${fields.contentTopic}</strong></p>\n  <hr style=\"border: none; border-top: 1px solid #ddd; margin: 24px 0;\" />\n  <h3 style=\"color: #111;\">Instagram Square (1:1)</h3>\n  <img src=\"${squareImg}\" style=\"width: 100%; max-width: 500px; border-radius: 8px; display: block; margin-bottom: 32px;\" />\n  <h3 style=\"color: #111;\">Instagram Story (9:16)</h3>\n  <img src=\"${storyImg}\" style=\"width: 100%; max-width: 280px; border-radius: 8px; display: block; margin-bottom: 32px;\" />\n  <h3 style=\"color: #111;\">LinkedIn Banner (16:9)</h3>\n  <img src=\"${linkedInImg}\" style=\"width: 100%; max-width: 600px; border-radius: 8px; display: block; margin-bottom: 32px;\" />\n  <hr style=\"border: none; border-top: 1px solid #ddd; margin: 24px 0;\" />\n  <p style=\"color: #888; font-size: 13px;\">Generated by Mark Calma Automation</p>\n</div>\n`;\n\nreturn {\n  emailTo: fields.email,\n  emailSubject: `On-brand images ready: ${fields.brandName} - ${fields.contentTopic}`,\n  emailBody: html\n};"
+      },
+      "id": "d5-node-11",
+      "name": "Build Email Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2200, 240]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.emailTo }}",
+        "subject": "={{ $json.emailSubject }}",
+        "message": "={{ $json.emailBody }}",
+        "options": { "appendAttribution": false }
+      },
+      "id": "d5-node-12",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2420, 240]
+    }
+  ],
+  "connections": {
+    "Tally Trigger": {
+      "main": [[{ "node": "Normalize Fields", "type": "main", "index": 0 }]]
+    },
+    "Normalize Fields": {
+      "main": [[{ "node": "Write Image Prompts", "type": "main", "index": 0 }]]
+    },
+    "Claude via OpenRouter": {
+      "ai_languageModel": [[{ "node": "Write Image Prompts", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Write Image Prompts": {
+      "main": [[{ "node": "Parse Prompts", "type": "main", "index": 0 }]]
+    },
+    "Parse Prompts": {
+      "main": [[{ "node": "Generate Instagram Square", "type": "main", "index": 0 }]]
+    },
+    "Generate Instagram Square": {
+      "main": [[{ "node": "Extract Square Image", "type": "main", "index": 0 }]]
+    },
+    "Extract Square Image": {
+      "main": [[{ "node": "Generate Instagram Story", "type": "main", "index": 0 }]]
+    },
+    "Generate Instagram Story": {
+      "main": [[{ "node": "Extract Story Image", "type": "main", "index": 0 }]]
+    },
+    "Extract Story Image": {
+      "main": [[{ "node": "Generate LinkedIn Banner", "type": "main", "index": 0 }]]
+    },
+    "Generate LinkedIn Banner": {
+      "main": [[{ "node": "Extract LinkedIn Banner", "type": "main", "index": 0 }]]
+    },
+    "Extract LinkedIn Banner": {
+      "main": [[{ "node": "Build Email Body", "type": "main", "index": 0 }]]
+    },
+    "Build Email Body": {
+      "main": [[{ "node": "Send Email", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "" },
+  "tags": []
+}

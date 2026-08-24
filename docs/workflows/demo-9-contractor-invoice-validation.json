@@ -1,0 +1,146 @@
+{
+  "name": "Demo 9: Contractor Invoice Validation",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d9-node-01",
+      "name": "Tally Trigger",
+      "type": "n8n-nodes-base.tallyTrigger",
+      "typeVersion": 1,
+      "position": [0, 240],
+      "webhookId": "d9-webhook-01"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fields = $input.item.json.data.fields;\nconst get = (label) => fields.find(f => f.label === label)?.value ?? '';\n\nreturn {\n  contractorName: get('Your name'),\n  contractorEmail: get('Your email'),\n  projectName: get('Project name'),\n  hoursWorked: parseFloat(get('Hours worked')) || 0,\n  rateSubmitted: parseFloat(get('Hourly rate (USD)')) || 0,\n  totalSubmitted: parseFloat(get('Total amount (USD)')) || 0,\n  invoicePeriod: get('Invoice period')\n};"
+      },
+      "id": "d9-node-02",
+      "name": "Normalize Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": { "value": "YOUR_GOOGLE_SHEET_ID", "__rl": true, "mode": "id" },
+        "sheetName": { "value": "Rate Sheet", "__rl": true, "mode": "name" },
+        "filters": {
+          "conditions": [{ "keyName": "Active", "condition": "eq", "keyValue": "Yes" }]
+        },
+        "options": {}
+      },
+      "id": "d9-node-03",
+      "name": "Look Up Agreed Rate",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [440, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const invoice = $('Normalize Fields').item.json;\nconst rateRows = $('Look Up Agreed Rate').all().map(i => i.json);\n\nconst contractorRow = rateRows.find(\n  r => r['Contractor Name']?.toLowerCase() === invoice.contractorName.toLowerCase()\n);\n\nif (!contractorRow) {\n  return {\n    ...invoice,\n    agreedRate: null,\n    totalCalculated: null,\n    status: 'Flagged',\n    flagReason: `Contractor \"${invoice.contractorName}\" not found in rate sheet. Please verify the name matches exactly.`\n  };\n}\n\nconst agreedRate = parseFloat(contractorRow['Agreed Rate (USD/hr)']) || 0;\nconst totalCalculated = Math.round(invoice.hoursWorked * agreedRate * 100) / 100;\nconst rateMatches = Math.abs(invoice.rateSubmitted - agreedRate) < 0.01;\nconst totalMatches = Math.abs(invoice.totalSubmitted - totalCalculated) < 0.01;\n\nlet status = 'Approved';\nlet flagReason = '';\n\nif (!rateMatches && !totalMatches) {\n  status = 'Flagged';\n  flagReason = `Rate mismatch: submitted $${invoice.rateSubmitted}/hr vs agreed $${agreedRate}/hr. Total mismatch: submitted $${invoice.totalSubmitted} vs calculated $${totalCalculated}.`;\n} else if (!rateMatches) {\n  status = 'Flagged';\n  flagReason = `Rate mismatch: submitted $${invoice.rateSubmitted}/hr vs agreed $${agreedRate}/hr. Expected total: $${totalCalculated}.`;\n} else if (!totalMatches) {\n  status = 'Flagged';\n  flagReason = `Total mismatch: submitted $${invoice.totalSubmitted} but ${invoice.hoursWorked}h x $${agreedRate}/hr = $${totalCalculated}.`;\n}\n\nreturn {\n  ...invoice,\n  agreedRate,\n  totalCalculated,\n  status,\n  flagReason\n};"
+      },
+      "id": "d9-node-04",
+      "name": "Validate Invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 240]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "YOUR_GOOGLE_SHEET_ID", "__rl": true, "mode": "id" },
+        "sheetName": { "value": "Invoice Log", "__rl": true, "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ new Date().toISOString() }}",
+            "Contractor Name": "={{ $json.contractorName }}",
+            "Contractor Email": "={{ $json.contractorEmail }}",
+            "Project": "={{ $json.projectName }}",
+            "Hours": "={{ $json.hoursWorked }}",
+            "Rate Submitted": "={{ $json.rateSubmitted }}",
+            "Rate Agreed": "={{ $json.agreedRate }}",
+            "Total Submitted": "={{ $json.totalSubmitted }}",
+            "Total Calculated": "={{ $json.totalCalculated }}",
+            "Status": "={{ $json.status }}",
+            "Flag Reason": "={{ $json.flagReason }}",
+            "Invoice Period": "={{ $json.invoicePeriod }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "d9-node-05",
+      "name": "Log to Invoice Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.item.json;\nconst isApproved = data.status === 'Approved';\n\nconst subject = isApproved\n  ? `Invoice Approved: ${data.projectName} - ${data.invoicePeriod}`\n  : `Invoice Flagged: ${data.projectName} - ${data.invoicePeriod}`;\n\nconst body = isApproved\n  ? `<div style=\"font-family: Arial, sans-serif; max-width: 600px; color: #111;\">\n  <h2 style=\"color: #16a34a;\">Invoice Approved</h2>\n  <p>Hi ${data.contractorName},</p>\n  <p>Your invoice for <strong>${data.projectName}</strong> (${data.invoicePeriod}) has been approved and logged for payment.</p>\n  <table style=\"border-collapse: collapse; width: 100%; margin: 16px 0;\">\n    <tr><td style=\"padding: 8px; border: 1px solid #eee;\"><strong>Hours</strong></td><td style=\"padding: 8px; border: 1px solid #eee;\">${data.hoursWorked}h</td></tr>\n    <tr><td style=\"padding: 8px; border: 1px solid #eee;\"><strong>Rate</strong></td><td style=\"padding: 8px; border: 1px solid #eee;\">$${data.agreedRate}/hr</td></tr>\n    <tr><td style=\"padding: 8px; border: 1px solid #eee;\"><strong>Total</strong></td><td style=\"padding: 8px; border: 1px solid #eee;\"><strong>$${data.totalSubmitted}</strong></td></tr>\n  </table>\n  <p style=\"color: #555;\">Payment will be processed on the next billing cycle.</p>\n</div>`\n  : `<div style=\"font-family: Arial, sans-serif; max-width: 600px; color: #111;\">\n  <h2 style=\"color: #dc2626;\">Invoice Flagged for Review</h2>\n  <p>Hi ${data.contractorName},</p>\n  <p>Your invoice for <strong>${data.projectName}</strong> (${data.invoicePeriod}) has been flagged and requires correction before it can be approved.</p>\n  <div style=\"background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin: 16px 0;\">\n    <strong>Issue:</strong> ${data.flagReason}\n  </div>\n  <p>Please resubmit with the corrected details. Reply to this email if you have questions.</p>\n</div>`;\n\nreturn {\n  emailTo: data.contractorEmail,\n  emailSubject: subject,\n  emailBody: body,\n  status: data.status,\n  contractorName: data.contractorName,\n  projectName: data.projectName,\n  flagReason: data.flagReason\n};"
+      },
+      "id": "d9-node-06",
+      "name": "Build Contractor Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 240]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.emailTo }}",
+        "subject": "={{ $json.emailSubject }}",
+        "message": "={{ $json.emailBody }}",
+        "options": { "appendAttribution": false }
+      },
+      "id": "d9-node-07",
+      "name": "Send Contractor Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1320, 240]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "value": "finance", "__rl": true, "mode": "name" },
+        "text": "=Invoice {{ $json.status }}: {{ $json.contractorName }} - {{ $json.projectName }}\n{{ $json.status === 'Approved' ? 'Approved and logged for payment.' : 'Flagged: ' + $json.flagReason }}",
+        "otherOptions": {}
+      },
+      "id": "d9-node-08",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1540, 240]
+    }
+  ],
+  "connections": {
+    "Tally Trigger": {
+      "main": [[{ "node": "Normalize Fields", "type": "main", "index": 0 }]]
+    },
+    "Normalize Fields": {
+      "main": [[{ "node": "Look Up Agreed Rate", "type": "main", "index": 0 }]]
+    },
+    "Look Up Agreed Rate": {
+      "main": [[{ "node": "Validate Invoice", "type": "main", "index": 0 }]]
+    },
+    "Validate Invoice": {
+      "main": [[{ "node": "Log to Invoice Sheet", "type": "main", "index": 0 }]]
+    },
+    "Log to Invoice Sheet": {
+      "main": [[{ "node": "Build Contractor Email", "type": "main", "index": 0 }]]
+    },
+    "Build Contractor Email": {
+      "main": [[{ "node": "Send Contractor Email", "type": "main", "index": 0 }]]
+    },
+    "Send Contractor Email": {
+      "main": [[{ "node": "Slack Alert", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "" },
+  "tags": []
+}
