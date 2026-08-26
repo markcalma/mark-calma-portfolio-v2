@@ -6,12 +6,12 @@ export async function POST(request: NextRequest) {
   const { password } = await request.json();
   const expected = process.env.DEMO_PASSWORD ?? '';
 
-  if (password !== expected) {
+  if (!expected || password !== expected) {
     return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
   }
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.set('ops_session', expected, {
+  response.cookies.set('ops_session', 'authenticated', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

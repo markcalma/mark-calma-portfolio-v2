@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/api'];
+const PUBLIC_PATHS = ['/login', '/api/auth'];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,14 +10,17 @@ export function proxy(request: NextRequest) {
   const isPublic = PUBLIC_PATHS.some(p => pathname.startsWith(p));
   if (isPublic) return NextResponse.next();
 
-  const session = request.cookies.get('ops_session');
   const expected = process.env.DEMO_PASSWORD ?? '';
+  const session = request.cookies.get('ops_session');
 
-  if (session?.value !== expected) {
+  const redirect = () => {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
-  }
+  };
+
+  if (!expected) return redirect();
+  if (session?.value !== 'authenticated') return redirect();
 
   return NextResponse.next();
 }

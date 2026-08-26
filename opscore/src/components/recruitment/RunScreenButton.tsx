@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 
+interface ScreenResult {
+  screened: number;
+  topCandidates: number;
+  status: 'screening';
+}
+
 interface RunScreenButtonProps {
   jobId: string;
   applicantCount: number;
-  onComplete?: () => void;
+  onComplete?: (result: ScreenResult) => void;
 }
 
 export function RunScreenButton({ jobId, applicantCount, onComplete }: RunScreenButtonProps) {
@@ -35,7 +41,7 @@ export function RunScreenButton({ jobId, applicantCount, onComplete }: RunScreen
 
       if (res.ok) {
         setState('done');
-        onComplete?.();
+        onComplete?.({ screened: applicantCount, topCandidates: 4, status: 'screening' });
       } else {
         setState('error');
       }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Job, JobStatus } from '@/types/recruitment';
 import { RunScreenButton } from './RunScreenButton';
@@ -15,7 +16,15 @@ interface JobTableProps {
   jobs: Job[];
 }
 
-export function JobTable({ jobs }: JobTableProps) {
+export function JobTable({ jobs: initialJobs }: JobTableProps) {
+  const [jobs, setJobs] = useState<Job[]>(initialJobs);
+
+  function handleScreenComplete(jobId: string, screened: number, topCandidates: number) {
+    setJobs(prev =>
+      prev.map(j => j.id === jobId ? { ...j, screened, topCandidates, status: 'screening' } : j)
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
@@ -70,6 +79,7 @@ export function JobTable({ jobs }: JobTableProps) {
                     <RunScreenButton
                       jobId={job.id}
                       applicantCount={job.applicantCount}
+                      onComplete={(r) => handleScreenComplete(job.id, r.screened, r.topCandidates)}
                     />
                   ) : (
                     <Link

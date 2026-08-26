@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Applicant } from '@/types/recruitment';
 import { ScoreBadge } from './ScoreBadge';
 
@@ -16,6 +17,7 @@ const RECOMMENDATION_STYLES = {
 
 export function CandidateDetail({ applicant, roleName }: CandidateDetailProps) {
   const rec = RECOMMENDATION_STYLES[applicant.recommendation];
+  const [actionSent, setActionSent] = useState(false);
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -100,13 +102,22 @@ export function CandidateDetail({ applicant, roleName }: CandidateDetailProps) {
             {rec.label}
           </p>
         </div>
-        <button
-          className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
-          style={{ background: rec.color, color: '#fff' }}
-          onClick={() => alert('Action triggered - n8n webhook would fire here')}
-        >
-          {rec.label}
-        </button>
+        {actionSent ? (
+          <span
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+            style={{ color: 'var(--color-success)', background: 'rgba(34,197,94,0.1)' }}
+          >
+            Action sent
+          </span>
+        ) : (
+          <button
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
+            style={{ background: rec.color, color: '#fff' }}
+            onClick={() => setActionSent(true)}
+          >
+            {rec.label}
+          </button>
+        )}
       </div>
     </div>
   );
