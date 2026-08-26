@@ -44,7 +44,7 @@ export function ApplicantTable({ applicants, jobId }: ApplicantTableProps) {
 
   return (
     <div>
-      <div className="flex gap-1 mb-4">
+      <div className="flex flex-wrap gap-1 mb-4">
         {tabs.map(tab => (
           <button
             key={tab}
@@ -52,7 +52,7 @@ export function ApplicantTable({ applicants, jobId }: ApplicantTableProps) {
             className="px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors"
             style={{
               background: filter === tab ? 'var(--color-accent)' : 'var(--color-surface)',
-              color: filter === tab ? '#fff' : 'var(--color-text-muted)',
+              color: filter === tab ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
               border: '1px solid var(--color-border)',
             }}
           >
