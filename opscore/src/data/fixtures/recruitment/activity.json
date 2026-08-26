@@ -1,0 +1,52 @@
+[
+  {
+    "id": "act-001",
+    "timestamp": "2026-08-26T09:47:00Z",
+    "message": "Screened 12 new applicants for React Developer - 2 shortlisted"
+  },
+  {
+    "id": "act-002",
+    "timestamp": "2026-08-26T08:30:00Z",
+    "message": "Sent screening questions to Sarah Chen - Marketing Manager"
+  },
+  {
+    "id": "act-003",
+    "timestamp": "2026-08-26T07:15:00Z",
+    "message": "Scheduled interview - James Rivera - Thursday 2pm"
+  },
+  {
+    "id": "act-004",
+    "timestamp": "2026-08-26T06:00:00Z",
+    "message": "Rejected 8 applicants below score threshold - notifications sent"
+  },
+  {
+    "id": "act-005",
+    "timestamp": "2026-08-25T09:00:00Z",
+    "message": "Screened 34 applicants for Marketing Manager - 3 shortlisted"
+  },
+  {
+    "id": "act-006",
+    "timestamp": "2026-08-25T08:45:00Z",
+    "message": "New job posted - Operations Lead at Apex Corp - 28 applicants pending"
+  },
+  {
+    "id": "act-007",
+    "timestamp": "2026-08-24T14:00:00Z",
+    "message": "Screened 19 applicants for UX Designer - 4 shortlisted"
+  },
+  {
+    "id": "act-008",
+    "timestamp": "2026-08-24T10:30:00Z",
+    "message": "Interview confirmed - Emma Walsh - UX Designer - Friday 10am"
+  },
+  {
+    "id": "act-009",
+    "timestamp": "2026-08-23T09:00:00Z",
+    "message": "Screened 52 applicants for Sales Manager - 6 shortlisted"
+  },
+  {
+    "id": "act-010",
+    "timestamp": "2026-08-22T11:00:00Z",
+    "message": "Social Media Manager position filled - offer accepted"
+  }
+]

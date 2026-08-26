@@ -1,0 +1,240 @@
+[
+  {
+    "id": "app-001",
+    "jobId": "marketing-manager",
+    "name": "Sarah Chen",
+    "score": 94,
+    "experience": "6 years",
+    "location": "Remote",
+    "status": "shortlisted",
+    "aiSummary": "Strong match. 6 years in B2B marketing, led a team of 4, managed a $500k ad budget. Exceeds experience requirement.",
+    "recommendation": "advance",
+    "skills": [
+      { "label": "Leadership", "match": 90 },
+      { "label": "Budget Management", "match": 85 },
+      { "label": "Team Size", "match": 70 },
+      { "label": "Industry Experience", "match": 95 }
+    ],
+    "highlights": [
+      "Led rebranding campaign that increased qualified leads by 43%",
+      "Managed paid media budget of $500k across Google and Meta",
+      "Built and mentored a team of 4 marketing specialists",
+      "Proficient in HubSpot, Salesforce, and GA4",
+      "MBA in Marketing from University of Washington"
+    ]
+  },
+  {
+    "id": "app-002",
+    "jobId": "marketing-manager",
+    "name": "James Rivera",
+    "score": 87,
+    "experience": "4 years",
+    "location": "New York",
+    "status": "shortlisted",
+    "aiSummary": "Good match. 4 years B2B experience with strong campaign results. Slightly under on team management experience but compensates with technical depth.",
+    "recommendation": "advance",
+    "skills": [
+      { "label": "Leadership", "match": 65 },
+      { "label": "Budget Management", "match": 80 },
+      { "label": "Team Size", "match": 55 },
+      { "label": "Industry Experience", "match": 88 }
+    ],
+    "highlights": [
+      "Drove 28% increase in MQL volume through SEO overhaul",
+      "Managed $200k annual paid search budget",
+      "Collaborated with cross-functional teams on 3 product launches",
+      "Certified in Google Ads and HubSpot Marketing",
+      "Bachelor's in Communications, Columbia University"
+    ]
+  },
+  {
+    "id": "app-003",
+    "jobId": "marketing-manager",
+    "name": "Maria Santos",
+    "score": 71,
+    "experience": "3 years",
+    "location": "Remote",
+    "status": "pending",
+    "aiSummary": "Moderate match. Strong creative background but limited B2B experience. Budget management history is below requirement.",
+    "recommendation": "request-info",
+    "skills": [
+      { "label": "Leadership", "match": 50 },
+      { "label": "Budget Management", "match": 40 },
+      { "label": "Team Size", "match": 30 },
+      { "label": "Industry Experience", "match": 60 }
+    ],
+    "highlights": [
+      "Managed social media for 3 consumer brands simultaneously",
+      "Grew Instagram following by 85k in 12 months",
+      "Coordinated influencer campaigns with $50k budgets",
+      "Strong copywriting and content creation skills",
+      "Bachelor's in Marketing, De La Salle University"
+    ]
+  },
+  {
+    "id": "app-004",
+    "jobId": "marketing-manager",
+    "name": "David Park",
+    "score": 68,
+    "experience": "2 years",
+    "location": "Chicago",
+    "status": "pending",
+    "aiSummary": "Below requirement. Limited experience for a manager role. Strong technical skills but lacks leadership history.",
+    "recommendation": "request-info",
+    "skills": [
+      { "label": "Leadership", "match": 25 },
+      { "label": "Budget Management", "match": 35 },
+      { "label": "Team Size", "match": 20 },
+      { "label": "Industry Experience", "match": 55 }
+    ],
+    "highlights": [
+      "Managed paid campaigns with $30k monthly budget",
+      "Strong analytical skills with advanced Excel and SQL",
+      "Created weekly performance reports for C-suite",
+      "2 years at mid-size SaaS company in growth role",
+      "Currently pursuing Google Analytics certification"
+    ]
+  },
+  {
+    "id": "app-005",
+    "jobId": "marketing-manager",
+    "name": "Priya Nair",
+    "score": 45,
+    "experience": "1 year",
+    "location": "Austin",
+    "status": "rejected",
+    "aiSummary": "Not a match. Entry-level experience does not meet minimum requirements for this manager role.",
+    "recommendation": "reject",
+    "skills": [
+      { "label": "Leadership", "match": 10 },
+      { "label": "Budget Management", "match": 15 },
+      { "label": "Team Size", "match": 0 },
+      { "label": "Industry Experience", "match": 30 }
+    ],
+    "highlights": [
+      "1 year as marketing coordinator at a startup",
+      "Assisted with email campaigns and social scheduling",
+      "No budget management or team leadership experience",
+      "Bachelor's in Business Administration, UT Austin"
+    ]
+  },
+  {
+    "id": "app-006",
+    "jobId": "marketing-manager",
+    "name": "Alex Thompson",
+    "score": 38,
+    "experience": "1 year",
+    "location": "Remote",
+    "status": "rejected",
+    "aiSummary": "Not a match. Resume shows primarily agency account management - limited direct marketing execution experience.",
+    "recommendation": "reject",
+    "skills": [
+      { "label": "Leadership", "match": 15 },
+      { "label": "Budget Management", "match": 20 },
+      { "label": "Team Size", "match": 5 },
+      { "label": "Industry Experience", "match": 25 }
+    ],
+    "highlights": [
+      "Account coordinator at small creative agency",
+      "Client communication and project coordination",
+      "No owned marketing channels or campaigns",
+      "Associate's degree in Business"
+    ]
+  },
+  {
+    "id": "app-007",
+    "jobId": "react-developer",
+    "name": "Kevin Liu",
+    "score": 96,
+    "experience": "7 years",
+    "location": "Remote",
+    "status": "interview-scheduled",
+    "aiSummary": "Exceptional match. 7 years React experience, open source contributor, led frontend architecture at a 50-person startup.",
+    "recommendation": "advance",
+    "skills": [
+      { "label": "React/Next.js", "match": 98 },
+      { "label": "TypeScript", "match": 95 },
+      { "label": "System Design", "match": 90 },
+      { "label": "Team Leadership", "match": 85 }
+    ],
+    "highlights": [
+      "Led frontend team of 6 at Series A startup",
+      "Built and maintains open source React component library with 2k stars",
+      "7 years professional React experience, 4 with TypeScript",
+      "Shipped 3 production apps used by 100k+ users",
+      "Computer Science degree, NUS Singapore"
+    ]
+  },
+  {
+    "id": "app-008",
+    "jobId": "react-developer",
+    "name": "Nina Patel",
+    "score": 89,
+    "experience": "5 years",
+    "location": "San Francisco",
+    "status": "shortlisted",
+    "aiSummary": "Strong match. 5 years React, solid TypeScript proficiency, experience shipping complex data dashboards.",
+    "recommendation": "advance",
+    "skills": [
+      { "label": "React/Next.js", "match": 92 },
+      { "label": "TypeScript", "match": 85 },
+      { "label": "System Design", "match": 75 },
+      { "label": "Team Leadership", "match": 60 }
+    ],
+    "highlights": [
+      "5 years building React applications at fintech companies",
+      "Owns frontend of a real-time trading dashboard",
+      "Strong in performance optimization and accessibility",
+      "TypeScript for 3 years across 2 production codebases",
+      "BS Computer Science, Stanford"
+    ]
+  },
+  {
+    "id": "app-009",
+    "jobId": "ux-designer",
+    "name": "Emma Walsh",
+    "score": 91,
+    "experience": "5 years",
+    "location": "Remote",
+    "status": "interview-scheduled",
+    "aiSummary": "Strong match. Portfolio shows deep expertise in B2B SaaS design, strong user research background.",
+    "recommendation": "advance",
+    "skills": [
+      { "label": "Figma", "match": 95 },
+      { "label": "User Research", "match": 88 },
+      { "label": "Design Systems", "match": 85 },
+      { "label": "Prototyping", "match": 90 }
+    ],
+    "highlights": [
+      "Led design for 3 B2B SaaS products from 0 to launch",
+      "Built and maintained a design system used by 8 engineers",
+      "Conducted 100+ user interviews across 2 companies",
+      "5 years Figma, advanced prototyping and auto-layout",
+      "MFA Design, Savannah College of Art and Design"
+    ]
+  },
+  {
+    "id": "app-010",
+    "jobId": "sales-manager",
+    "name": "Marcus Green",
+    "score": 93,
+    "experience": "8 years",
+    "location": "New York",
+    "status": "interview-scheduled",
+    "aiSummary": "Excellent match. 8 years B2B sales, quota over-achievement 3 years running, experience building and managing SDR teams.",
+    "recommendation": "advance",
+    "skills": [
+      { "label": "B2B Sales", "match": 96 },
+      { "label": "Team Leadership", "match": 90 },
+      { "label": "CRM/Salesforce", "match": 88 },
+      { "label": "Revenue Operations", "match": 82 }
+    ],
+    "highlights": [
+      "Exceeded quota by 130% in 2024, 118% in 2023",
+      "Built an SDR team of 8 from scratch over 18 months",
+      "Closed $2.4M ARR as individual contributor in 2023",
+      "Expert in Salesforce, Outreach, and LinkedIn Sales Navigator",
+      "BA Economics, Georgetown University"
+    ]
+  }
+]
