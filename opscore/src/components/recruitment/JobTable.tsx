@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { Job, JobStatus } from '@/types/recruitment';
+import { RunScreenButton } from './RunScreenButton';
 
 const STATUS_STYLES: Record<JobStatus, { label: string; color: string; bg: string }> = {
   new: { label: 'New', color: 'var(--color-text-muted)', bg: 'var(--color-border)' },
@@ -64,7 +67,10 @@ export function JobTable({ jobs }: JobTableProps) {
                 </td>
                 <td className="px-4 py-3">
                   {isUnscreened ? (
-                    <div id={`run-screen-${job.id}`} />
+                    <RunScreenButton
+                      jobId={job.id}
+                      applicantCount={job.applicantCount}
+                    />
                   ) : (
                     <Link
                       href={`/recruitment/applicants/${job.id}`}
