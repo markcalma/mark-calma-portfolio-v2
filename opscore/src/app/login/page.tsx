@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
 
 function LoginForm() {
   const router = useRouter();
@@ -26,69 +25,53 @@ function LoginForm() {
       const from = searchParams.get('from') ?? '/dashboard';
       router.push(from);
     } else {
-      setError('Incorrect password. Try again.');
+      setError('Incorrect password.');
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--color-bg)' }}>
-      <div className="w-full max-w-sm">
-        <div className="mb-8">
-          <p className="text-xs font-mono uppercase tracking-widest mb-2" style={{ color: 'var(--color-accent)' }}>
-            OpsCore
-          </p>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            Operations Command Center
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-8">
+      <div className="w-full max-w-sm flex flex-col items-center gap-10 text-center">
+
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-xs font-medium tracking-widest text-zinc-400 uppercase">OpsCore</p>
+          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 leading-tight">
+            Operations<br />Command Center
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-            Enter your demo access password to continue.
-          </p>
+          <p className="text-sm text-zinc-400 mt-1">Restricted access. Authorised users only.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-primary)' }}>
-              Password
-            </label>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-1.5">
+            <label className="text-xs font-medium text-zinc-500 uppercase tracking-widest">Password</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Enter demo password"
+              placeholder="••••••••"
               required
-              className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-colors"
-              style={{
-                background: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                color: 'var(--color-text-primary)',
-              }}
-              onFocus={e => (e.target.style.borderColor = 'var(--color-accent)')}
-              onBlur={e => (e.target.style.borderColor = 'var(--color-border)')}
+              className="w-32 bg-transparent text-zinc-900 placeholder-zinc-300 text-base px-0 py-3 outline-none border-b border-zinc-200 focus:border-zinc-900 transition-all text-center"
             />
           </div>
 
           {error && (
-            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
+            <p className="text-red-500 text-xs">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold transition-opacity"
-            style={{
-              background: 'var(--color-accent)',
-              color: '#fff',
-              opacity: loading ? 0.7 : 1,
-            }}
+            className="text-zinc-900 hover:text-zinc-400 text-sm font-semibold mt-1 transition-colors disabled:opacity-40"
           >
-            {loading ? 'Signing in...' : 'Access Demo'}
+            {loading ? 'Verifying...' : 'Continue'}
           </button>
         </form>
 
-        <p className="text-xs mt-6 text-center" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-zinc-300 text-xs">
           Built by Mark Calma - Automation Agency
         </p>
+
       </div>
     </div>
   );
