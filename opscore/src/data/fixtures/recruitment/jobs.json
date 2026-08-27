@@ -1,0 +1,137 @@
+[
+  {
+    "id": "marketing-manager",
+    "role": "Marketing Manager",
+    "client": "BrandLift Co.",
+    "applicantCount": 34,
+    "screened": 34,
+    "topCandidates": 3,
+    "status": "screening"
+  },
+  {
+    "id": "react-developer",
+    "role": "React Developer",
+    "client": "TechFlow Inc.",
+    "applicantCount": 67,
+    "screened": 67,
+    "topCandidates": 5,
+    "status": "interviewing"
+  },
+  {
+    "id": "operations-lead",
+    "role": "Operations Lead",
+    "client": "Apex Corp.",
+    "applicantCount": 28,
+    "screened": 0,
+    "topCandidates": 0,
+    "status": "new"
+  },
+  {
+    "id": "content-strategist",
+    "role": "Content Strategist",
+    "client": "GrowthLab",
+    "applicantCount": 41,
+    "screened": 41,
+    "topCandidates": 2,
+    "status": "screening"
+  },
+  {
+    "id": "ux-designer",
+    "role": "UX Designer",
+    "client": "Pixel Studio",
+    "applicantCount": 19,
+    "screened": 19,
+    "topCandidates": 4,
+    "status": "interviewing"
+  },
+  {
+    "id": "sales-manager",
+    "role": "Sales Manager",
+    "client": "NovaSales",
+    "applicantCount": 52,
+    "screened": 52,
+    "topCandidates": 6,
+    "status": "interviewing"
+  },
+  {
+    "id": "data-analyst",
+    "role": "Data Analyst",
+    "client": "DataCore",
+    "applicantCount": 38,
+    "screened": 38,
+    "topCandidates": 3,
+    "status": "screening"
+  },
+  {
+    "id": "project-manager",
+    "role": "Project Manager",
+    "client": "BuildRight",
+    "applicantCount": 23,
+    "screened": 23,
+    "topCandidates": 2,
+    "status": "screening"
+  },
+  {
+    "id": "devops-engineer",
+    "role": "DevOps Engineer",
+    "client": "CloudStack",
+    "applicantCount": 29,
+    "screened": 29,
+    "topCandidates": 3,
+    "status": "screening"
+  },
+  {
+    "id": "customer-success",
+    "role": "Customer Success Manager",
+    "client": "RetainCo",
+    "applicantCount": 44,
+    "screened": 44,
+    "topCandidates": 5,
+    "status": "interviewing"
+  },
+  {
+    "id": "copywriter",
+    "role": "Copywriter",
+    "client": "Wordsmith Agency",
+    "applicantCount": 61,
+    "screened": 61,
+    "topCandidates": 4,
+    "status": "screening"
+  },
+  {
+    "id": "product-manager",
+    "role": "Product Manager",
+    "client": "ProductLab",
+    "applicantCount": 33,
+    "screened": 33,
+    "topCandidates": 3,
+    "status": "screening"
+  },
+  {
+    "id": "social-media-manager",
+    "role": "Social Media Manager",
+    "client": "BrandLift Co.",
+    "applicantCount": 56,
+    "screened": 56,
+    "topCandidates": 7,
+    "status": "filled"
+  },
+  {
+    "id": "backend-developer",
+    "role": "Backend Developer",
+    "client": "TechFlow Inc.",
+    "applicantCount": 47,
+    "screened": 47,
+    "topCandidates": 4,
+    "status": "interviewing"
+  },
+  {
+    "id": "hr-coordinator",
+    "role": "HR Coordinator",
+    "client": "PeopleFirst",
+    "applicantCount": 21,
+    "screened": 21,
+    "topCandidates": 2,
+    "status": "screening"
+  }
+]
