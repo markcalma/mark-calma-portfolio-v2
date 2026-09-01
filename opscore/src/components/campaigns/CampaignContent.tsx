@@ -91,15 +91,15 @@ export function CampaignContent({ initialCampaigns, initialActivity }: Props) {
       </div>
 
       <div style={{ display: 'flex', gap: 24, flex: 1, minHeight: 0 }}>
-        <div className="rounded-xl bg-card shadow-sm overflow-hidden" style={{ flex: 1 }}>
+        <div className="rounded-xl bg-card shadow-sm" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           <div
             className="flex items-center justify-between"
-            style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)' }}
+            style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}
           >
             <p className="text-sm font-semibold text-foreground">Campaign Pipeline</p>
             <p className="text-xs text-muted-foreground">{campaigns.length} campaigns</p>
           </div>
-          <div className="overflow-y-auto">
+          <div style={{ overflowX: 'auto', overflowY: 'auto', flex: 1 }}>
             <CampaignTable campaigns={campaigns} />
           </div>
         </div>

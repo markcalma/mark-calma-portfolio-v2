@@ -48,7 +48,7 @@ export function GenerateReportButton({ campaignId, onComplete }: GenerateReportB
     return (
       <button
         onClick={handleClick}
-        className="text-xs font-semibold rounded-lg transition-opacity hover:opacity-80"
+        className="text-xs font-semibold rounded-lg transition-opacity hover:opacity-80 whitespace-nowrap"
         style={{ background: '#4f46e5', color: '#fff', padding: '6px 14px' }}
       >
         Generate AI Report

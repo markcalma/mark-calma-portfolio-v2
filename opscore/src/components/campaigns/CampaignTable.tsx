@@ -23,7 +23,7 @@ interface CampaignTableProps {
 export function CampaignTable({ campaigns }: CampaignTableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
+      <table className="w-full text-sm border-collapse" style={{ minWidth: 860 }}>
         <thead>
           <tr className="bg-muted/40">
             {['Campaign', 'Client', 'Platform', 'Spend', 'ROAS', 'Conversions', 'Status', 'Action'].map(h => (

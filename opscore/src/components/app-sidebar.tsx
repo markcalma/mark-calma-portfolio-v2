@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { Users, Ship, ShoppingBag, Home, Hospital, Wrench, UtensilsCrossed, BarChart2, Scale, Package, LogOut } from "lucide-react"
 import {
   Sidebar,
@@ -30,6 +31,7 @@ const modules = [
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader style={{ padding: '28px 24px 20px' }}>
@@ -47,7 +49,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {modules.map((mod) => (
                 <SidebarMenuItem key={mod.title} style={{ margin: '1px 12px' }}>
                   <SidebarMenuButton
-                    isActive={mod.active}
+                    isActive={mod.active && pathname.startsWith(mod.href)}
                     tooltip={mod.title}
                     render={<a href={mod.active ? mod.href : undefined} />}
                     style={{
@@ -58,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       borderRadius: 8,
                       cursor: mod.active ? 'pointer' : 'not-allowed',
                       opacity: mod.active ? 1 : 0.4,
-                      fontWeight: mod.active ? 500 : 400,
+                      fontWeight: (mod.active && pathname.startsWith(mod.href)) ? 600 : mod.active ? 400 : 400,
                       fontSize: 13,
                       width: '100%',
                     }}
