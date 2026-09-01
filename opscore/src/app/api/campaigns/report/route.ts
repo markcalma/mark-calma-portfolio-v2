@@ -43,7 +43,7 @@ async function updateCampaignInSupabase(campaignId: string) {
     .eq('id', campaignId);
 
   await supabase.from('activity_feed').insert({
-    id: `act-${Date.now()}`,
+    id: `act-${Date.now()}-${campaignId}`,
     campaign_id: campaignId,
     message: `AI analyzed ${campaign.name} for ${campaign.client_name} — ${campaign.roas}x ROAS, ${recommendations.length} recommendations generated`,
     timestamp: new Date().toISOString(),
